@@ -1,0 +1,2 @@
+# Placeholder for favicon.png
+# Use a 48x48 PNG image for the web favicon
