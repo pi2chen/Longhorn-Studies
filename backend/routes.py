@@ -2,6 +2,10 @@ from flask import Blueprint, request, jsonify
 from database import db
 from models import Item, User
 from datetime import datetime
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Create Blueprint
 api_bp = Blueprint('api', __name__)
@@ -11,7 +15,7 @@ api_bp = Blueprint('api', __name__)
 @api_bp.before_request
 def log_request():
     """Log all incoming requests."""
-    print(f"[{datetime.utcnow()}] {request.method} {request.path}")
+    logger.info(f"{request.method} {request.path}")
 
 
 # Error handlers
@@ -56,7 +60,7 @@ def get_items():
         items = Item.query.all()
         return jsonify([item.to_dict() for item in items]), 200
     except Exception as e:
-        print(f"Error fetching items: {str(e)}")
+        logger.error(f"Error fetching items: {str(e)}")
         return jsonify({'error': 'Failed to fetch items'}), 500
 
 
@@ -69,7 +73,7 @@ def get_item(item_id):
         item = Item.query.get_or_404(item_id)
         return jsonify(item.to_dict()), 200
     except Exception as e:
-        print(f"Error fetching item {item_id}: {str(e)}")
+        logger.error(f"Error fetching item {item_id}: {str(e)}")
         return jsonify({'error': 'Item not found'}), 404
 
 
@@ -93,10 +97,11 @@ def create_item():
         db.session.add(item)
         db.session.commit()
         
+        logger.info(f"Created item: {item.name} (ID: {item.id})")
         return jsonify(item.to_dict()), 201
     except Exception as e:
         db.session.rollback()
-        print(f"Error creating item: {str(e)}")
+        logger.error(f"Error creating item: {str(e)}")
         return jsonify({'error': 'Failed to create item'}), 500
 
 
@@ -121,10 +126,11 @@ def update_item(item_id):
         item.updated_at = datetime.utcnow()
         db.session.commit()
         
+        logger.info(f"Updated item: {item.name} (ID: {item.id})")
         return jsonify(item.to_dict()), 200
     except Exception as e:
         db.session.rollback()
-        print(f"Error updating item {item_id}: {str(e)}")
+        logger.error(f"Error updating item {item_id}: {str(e)}")
         return jsonify({'error': 'Failed to update item'}), 500
 
 
@@ -135,13 +141,15 @@ def delete_item(item_id):
     """
     try:
         item = Item.query.get_or_404(item_id)
+        item_name = item.name
         db.session.delete(item)
         db.session.commit()
         
+        logger.info(f"Deleted item: {item_name} (ID: {item_id})")
         return jsonify({'message': 'Item deleted successfully'}), 200
     except Exception as e:
         db.session.rollback()
-        print(f"Error deleting item {item_id}: {str(e)}")
+        logger.error(f"Error deleting item {item_id}: {str(e)}")
         return jsonify({'error': 'Failed to delete item'}), 500
 
 
@@ -155,7 +163,7 @@ def get_users():
         users = User.query.all()
         return jsonify([user.to_dict() for user in users]), 200
     except Exception as e:
-        print(f"Error fetching users: {str(e)}")
+        logger.error(f"Error fetching users: {str(e)}")
         return jsonify({'error': 'Failed to fetch users'}), 500
 
 
@@ -186,8 +194,9 @@ def create_user():
         db.session.add(user)
         db.session.commit()
         
+        logger.info(f"Created user: {user.username} (ID: {user.id})")
         return jsonify(user.to_dict()), 201
     except Exception as e:
         db.session.rollback()
-        print(f"Error creating user: {str(e)}")
+        logger.error(f"Error creating user: {str(e)}")
         return jsonify({'error': 'Failed to create user'}), 500

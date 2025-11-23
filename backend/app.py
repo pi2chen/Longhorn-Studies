@@ -2,9 +2,16 @@ from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+import logging
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -30,6 +37,10 @@ app.register_blueprint(api_bp, url_prefix='/api')
 # Create database tables
 with app.app_context():
     db.create_all()
+    logging.info("Database tables created successfully")
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    # WARNING: Debug mode should be disabled in production
+    # Set FLASK_ENV=production in .env for production deployment
+    debug_mode = os.getenv('FLASK_ENV', 'development') != 'production'
+    app.run(debug=debug_mode, host='0.0.0.0', port=8000)
