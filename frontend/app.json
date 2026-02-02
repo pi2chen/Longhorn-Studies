@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Longhorn Studies",
+    "slug": "longhorn-studies",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#bf5700"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.longhorn.studies"
+    },
+    "android": {
+      "package": "com.longhorn.studies",
+      "adaptiveIcon": {
+        "backgroundColor": "#bf5700"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
