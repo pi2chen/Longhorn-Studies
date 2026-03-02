@@ -1,4 +1,5 @@
 from database import db
+from url_utils import normalize_picture_urls
 
 
 def default_access_hours():
@@ -39,7 +40,7 @@ class StudySpot(db.Model):
             'address': self.address,
             'floor': self.floor,
             'tags': self.tags if self.tags is not None else [],
-            'pictures': self.pictures if self.pictures is not None else [],
+            'pictures': normalize_picture_urls(self.pictures),
             'noise_level': self.noise_level,
             'capacity': self.capacity,
             'spot_type': self.spot_type if self.spot_type is not None else [],

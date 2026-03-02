@@ -82,6 +82,28 @@ The server will start on `http://localhost:8000`
 - **PUT** `/api/study_spots/<id>` - Update a study spot (send only fields to update)
 - **DELETE** `/api/study_spots/<id>` - Delete a study spot
 
+`GET /api/study_spots*` responses return `pictures` as backend image API URLs in the format:
+`/api/study_spots/<id>/images/<image_index>`
+
+### Images
+- **GET** `/api/study_spots/<id>/images/<image_index>` - Proxy an image by study spot ID and picture index (recommended for frontend use)
+- **GET** `/api/image_proxy?url=<encoded_remote_url>` - Proxy a remote image URL directly (useful for one-off testing/debugging)
+
+### Uploading and Accessing Images
+This backend stores image **URLs** in the database (it does not accept raw image file uploads).
+
+1. Host each image at a publicly accessible URL (Google Drive public links are supported and normalized).
+2. Create or update a study spot with those URLs in the `pictures` array via:
+   - `POST /api/study_spots`
+   - `PUT /api/study_spots/<id>`
+3. Read the study spot from:
+   - `GET /api/study_spots`
+   - `GET /api/study_spots/<id>`
+4. Use each returned `pictures` value directly in the frontend. These values are backend API endpoints like:
+   - `http://localhost:8000/api/study_spots/1/images/0`
+5. Optional: For a specific source URL, you can also access it through:
+   - `GET /api/image_proxy?url=<encoded_remote_url>`
+
 ## Database
 
 The application uses SQLite by default for development. The database file will be created automatically as `longhorn_studies.db` when you first run the application.
@@ -125,3 +147,11 @@ The application runs in debug mode by default for development. For production:
    pip install gunicorn
    gunicorn app:app
    ```
+
+To normalize existing image links in the database:
+
+```bash
+cd backend
+source venv/bin/activate
+python scripts/normalize_picture_links.py
+```

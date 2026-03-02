@@ -43,4 +43,4 @@ if __name__ == '__main__':
     # WARNING: Debug mode should be disabled in production
     # Set FLASK_ENV=production in .env for production deployment
     debug_mode = os.getenv('FLASK_ENV', 'development') != 'production'
-    app.run(debug=debug_mode, host='0.0.0.0', port=8000)
+    app.run(debug=debug_mode, host='0.0.0.0', port=8000, threaded=True)
