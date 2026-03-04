@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from database import db
+from sqlalchemy import inspect
 from models import StudySpot
 from datetime import datetime
 import logging
@@ -59,6 +60,73 @@ STUDY_SPOT_REQUIRED = {
 
 TIME_PATTERN = re.compile(r'^([01]\d|2[0-3]):([0-5]\d)$')
 
+@api_bp.route('/schema', methods=['GET'])
+def get_schema():
+    """Return database schema information."""
+    try:
+        # Get all tables
+        inspector = inspect(db.engine)
+        tables = inspector.get_table_names()
+        
+        schema = {}
+        for table in tables:
+            columns = inspector.get_columns(table)
+            schema[table] = {
+                'columns': [
+                    {
+                        'name': col['name'],
+                        'type': str(col['type']),
+                        'nullable': col['nullable'],
+                        'default': str(col['default']) if col['default'] is not None else None
+                    }
+                    for col in columns
+                ]
+            }
+        
+        return jsonify(schema), 200
+    except Exception as e:
+        logger.error(f"Error getting schema: {str(e)}")
+        return jsonify({'error': 'Failed to get schema'}), 500
+
+@api_bp.route('/study_spots/raw', methods=['GET'])
+def get_raw_study_spots():
+    """Return raw StudySpot data as-is from database."""
+    try:
+        spots = StudySpot.query.all()
+        return jsonify([s.to_dict() for s in spots]), 200
+    except Exception as e:
+        logger.error(f"Error fetching raw study spots: {str(e)}")
+        return jsonify({'error': 'Failed to fetch study spots'}), 500
+
+@api_bp.route('/study_spots/distinct/<column>', methods=['GET'])
+def get_distinct_values(column):
+    try: 
+        allowed_columns = {'spot_type', 'noise_level', 'tags', 'access_hours'}
+        if column not in allowed_columns:
+            return jsonify({'error': 'Invalid column name'}), 400
+        
+        if column == 'access_hours':
+            # For open now, return boolean options as JSON booleans
+            return jsonify([True, False]), 200
+        elif column in {'spot_type', 'tags'}:
+            # Handle JSON arrays
+            spots = StudySpot.query.all()
+            values = set()
+            for spot in spots:
+                col_data = getattr(spot, column)
+                if col_data: 
+                    for item in col_data:
+                        if item:
+                            values.add(str(item))
+        else: 
+            # Handle regular string columns
+            values = db.session.query(getattr(StudySpot, column)).distinct().all()
+            values = [v[0] for v in values if v[0] is not None]
+
+        return jsonify(sorted(list(values))), 200
+    except Exception as e:
+        logger.error(f"Error fetching distinct values for column {column}: {str(e)}")
+        return jsonify({'error': 'Failed to fetch distinct values'}), 500
 
 def _normalize_access_hours(value):
     """
