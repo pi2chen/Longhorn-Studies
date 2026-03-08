@@ -202,6 +202,39 @@ Where:
 - Ensure checks pass (build, lint, test)
 - Request review before merging
 
+## Development Workflow
+### Branch naming conventions + Conventional Commits
+We follow the Conventional Commits specification for commit messages. This ensures a consistent commit history and enables automated versioning and changelog generation.
+
+### Branch Naming Conventions 
+```
+<type>/<short-description>
+```
+Examples: 
+- feature/{feature-name}
+- fix/{bug-description}
+- docs/{documentation-change}
+### Commit Message
+Follow this structure for commit messages
+```
+<type>(<scope>): <subject>
+```
+Where:
+```type``` has one of the following:
+- feat: New features
+- fix: Bug fixes
+- docs: Documentation changes
+- style: Code formatting only
+- refactor: Code changes without behavior change
+- test: Adding or updating tests
+- chore: Build process or tooling updates
+
+### PR process
+- Fork or branch from main
+- Create a PR with a clear description
+- Ensure checks pass (build, lint, test)
+- Request review before merging
+
 ## License
 
 MIT

@@ -1,0 +1,14 @@
+diff --git a/dist/metro/tailwind/v3/index.js b/dist/metro/tailwind/v3/index.js
+index 7e21e741ffedce14ecbe4aa0072412146bfad61e..bed4f97158390d296cba16fae10ae1cdef496c93 100644
+--- a/dist/metro/tailwind/v3/index.js
++++ b/dist/metro/tailwind/v3/index.js
+@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.tailwindCliV3 = void 0;
+ exports.tailwindConfigV3 = tailwindConfigV3;
+ const child_process_1 = require("child_process");
+-const child_file = __dirname + "/child.js";
++const path_1 = require("path");
++const child_file = path_1.join(__dirname, "child.js");
+ const getEnv = (options) => {
+     return {
+         ...process.env,
