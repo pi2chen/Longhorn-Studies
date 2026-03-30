@@ -271,8 +271,8 @@ export default function StudySpotDetailsScreen() {
           </View>
 
           <View className="mt-2 flex-row flex-wrap gap-2">
-            {spot.tags.slice(0, 4).map((tag) => (
-              <Tag key={tag} tag={tag} />
+            {spot.tags.slice(0, 4).map((tag, index) => (
+              <Tag key={`${tag}-${index}`} tag={tag} />
             ))}
           </View>
 
