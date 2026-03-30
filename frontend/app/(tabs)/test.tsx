@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { Platform, StyleSheet, View, Text } from "react-native";
+import { View } from "react-native";
 
 import StudySpotCard from "@/components/ui/study-spot-card";
 
