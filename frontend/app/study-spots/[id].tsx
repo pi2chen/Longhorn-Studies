@@ -81,12 +81,19 @@ const getOpenState = (hours: AccessWindow[], now = new Date()): OpenState => {
   const closeMinutes = toMinutes(close);
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const isOpenNow = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+  // Handle overnight windows where close time is after midnight (e.g. 20:00–02:00).
+  const isOvernight = closeMinutes <= openMinutes;
+  const adjustedCloseMinutes = isOvernight ? closeMinutes + 24 * 60 : closeMinutes;
+  const adjustedCurrentMinutes =
+    isOvernight && currentMinutes < openMinutes ? currentMinutes + 24 * 60 : currentMinutes;
+
+  const isOpenNow =
+    adjustedCurrentMinutes >= openMinutes && adjustedCurrentMinutes < adjustedCloseMinutes;
   if (!isOpenNow) {
     return "closed";
   }
 
-  if (closeMinutes - currentMinutes <= 60) {
+  if (adjustedCloseMinutes - adjustedCurrentMinutes <= 60) {
     return "closing";
   }
 
