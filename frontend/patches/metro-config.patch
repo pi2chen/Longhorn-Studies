@@ -1,0 +1,22 @@
+diff --git a/src/loadConfig.js b/src/loadConfig.js
+index 7ac9d88404063ce86d8c15a91ce72c439b455075..2db611b8bd151622faa2cb21e757934815db2775 100644
+--- a/src/loadConfig.js
++++ b/src/loadConfig.js
+@@ -15,6 +15,7 @@ var MetroCache = _interopRequireWildcard(require("metro-cache"));
+ var _os = require("os");
+ var path = _interopRequireWildcard(require("path"));
+ var _yaml = require("yaml");
++var _url = require("url");
+ function _getRequireWildcardCache(e) {
+   if ("function" != typeof WeakMap) return null;
+   var r = new WeakMap(),
+@@ -289,7 +290,8 @@ async function loadConfigFile(absolutePath) {
+       }
+     } catch (e) {
+       try {
+-        const configModule = await import(absolutePath);
++        const importPath = process.platform === 'win32' ? (0, _url.pathToFileURL)(absolutePath).href : absolutePath;
++        const configModule = await import(importPath);
+         config = await configModule.default;
+       } catch (error) {
+         let prefix = `Error loading Metro config at: ${absolutePath}\n`;
