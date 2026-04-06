@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import OpenStatus from "@/components/ui/open-status";
-import { BookmarkIcon, ClockIcon } from "@/components/ui/icons";
+import { BookmarkIcon } from "@/components/ui/icons";
 import { Tag } from "@/components/ui/tags";
 import { API_BASE } from "@/constants/api";
 
@@ -32,10 +32,14 @@ type StudySpot = {
   access_hours: AccessWindow[];
   capacity: number;
   description: string;
+  rating: number;
+  review_count: number;
 };
 
-const HERO_FALLBACK_IMAGE = "https://www.figma.com/api/mcp/asset/5df83070-6875-46ce-bb36-352db5c62f9f";
-const MAP_PREVIEW_IMAGE = "https://www.figma.com/api/mcp/asset/60b7c73c-cfc1-452a-abca-5840eabc917d";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const HERO_FALLBACK_IMAGE = require("@/assets/images/study-spot-hero-placeholder.jpg");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const MAP_PREVIEW_IMAGE = require("@/assets/images/map-preview-placeholder.png");
 const PLACEHOLDER_ACCESS_HOURS: AccessWindow[] = [
   ["08:00", "17:00"],
   ["08:00", "17:00"],
@@ -139,6 +143,8 @@ const getPlaceholderSpot = (id: number): StudySpot => ({
   capacity: 30,
   description:
     "A student lounge located near the East entrance of SZB with large windows, cozy seating, plenty of outlets, and a printer.",
+  rating: 4.2,
+  review_count: 13,
 });
 
 export default function StudySpotDetailsScreen() {
@@ -227,11 +233,16 @@ export default function StudySpotDetailsScreen() {
   const weeklyHoursSummary = getWeekdaySummary(spot.access_hours);
   const heroImage = spot.pictures?.[0] ?? HERO_FALLBACK_IMAGE;
 
+  const fullStars = Math.floor(spot.rating);
+  const hasHalfStar = spot.rating - fullStars >= 0.1;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
   return (
     <View className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: false }} />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 90 + insets.bottom }}>
+        {/* Hero image */}
         <View className="relative">
           <Image source={heroImage} contentFit="cover" style={{ width: "100%", height: 281 }} />
 
@@ -268,41 +279,50 @@ export default function StudySpotDetailsScreen() {
             </View>
           )}
 
+          {/* Name */}
           <Text className="text-details-header text-main-text font-roboto font-medium">
             <Text className="text-burnt-orange font-bold">{spot.abbreviation}</Text>{" "}
             {spot.study_spot_name}
           </Text>
 
-          <View className="mt-2">
-            <OpenStatus openStatus={openState} />
-          </View>
-
-          <View className="mt-2 flex-row flex-wrap gap-2">
-            {spot.tags.slice(0, 4).map((tag, index) => (
-              <Tag key={`${tag}-${index}`} tag={tag} />
-            ))}
-          </View>
-
-          <View className="mt-2 flex-row items-center gap-1">
+          {/* Address */}
+          <View className="mt-1 flex-row items-center gap-1 px-1">
             <Ionicons name="location-outline" size={15} color="#94A3B8" />
-            <Text className="text-spot-name text-gray-text font-roboto">{toAddressLine(spot)}</Text>
+            <Text className="text-spot-name text-gray-text font-roboto font-medium">
+              {toAddressLine(spot)}
+            </Text>
           </View>
 
-          <Text className="mt-3 text-base-16 text-main-text font-roboto">{spot.description}</Text>
+          {/* Open status + Hours row */}
+          <View className="mt-2 flex-row items-center gap-2">
+            <OpenStatus openStatus={openState} />
+            <Text className="text-base-16 text-main-text font-roboto">{weeklyHoursSummary}</Text>
+            <Ionicons name="chevron-down" size={18} color="#333F48" />
+          </View>
 
+          {/* Rating */}
+          <View className="mt-2 flex-row items-center gap-2">
+            <Text className="text-base-16 text-main-text font-roboto font-medium">
+              {spot.rating.toFixed(1)}
+            </Text>
+            <View className="flex-row items-center gap-1">
+              {Array.from({ length: fullStars }).map((_, i) => (
+                <Ionicons key={`full-${i}`} name="star" size={20} color="#BF5700" />
+              ))}
+              {hasHalfStar && <Ionicons name="star-half" size={20} color="#BF5700" />}
+              {Array.from({ length: emptyStars }).map((_, i) => (
+                <Ionicons key={`empty-${i}`} name="star-outline" size={20} color="#BF5700" />
+              ))}
+            </View>
+            <Text className="text-base-16 text-gray-text font-roboto">
+              ({spot.review_count})
+            </Text>
+          </View>
+
+          {/* Divider */}
           <View className="mt-4 h-px bg-card-border/80" />
 
-          <View className="mt-4">
-            <View className="flex-row items-center gap-1">
-              <ClockIcon size={16} className="text-gray-text" />
-              <Text className="text-spot-name text-gray-text font-roboto font-medium">Hours</Text>
-            </View>
-            <View className="mt-1 flex-row items-center gap-2">
-              <Text className="text-base-16 text-main-text font-roboto">{weeklyHoursSummary}</Text>
-              <Ionicons name="chevron-down" size={18} color="#333F48" />
-            </View>
-          </View>
-
+          {/* Full Building Name */}
           <View className="mt-4">
             <View className="flex-row items-center gap-1">
               <Ionicons name="business-outline" size={16} color="#94A3B8" />
@@ -315,6 +335,7 @@ export default function StudySpotDetailsScreen() {
             </Text>
           </View>
 
+          {/* Estimated Capacity */}
           <View className="mt-4">
             <View className="flex-row items-center gap-1">
               <Ionicons name="people-outline" size={18} color="#94A3B8" />
@@ -325,8 +346,16 @@ export default function StudySpotDetailsScreen() {
             <Text className="mt-1 text-base-16 text-main-text font-roboto">{spot.capacity}</Text>
           </View>
 
+          {/* Tags */}
+          <View className="mt-4 flex-row flex-wrap gap-2">
+            {spot.tags.slice(0, 4).map((tag, index) => (
+              <Tag key={`${tag}-${index}`} tag={tag} />
+            ))}
+          </View>
+
+          {/* Map preview */}
           <View className="mt-4 overflow-hidden rounded-xl border border-card-border relative">
-            <Image source={MAP_PREVIEW_IMAGE} contentFit="cover" style={{ width: "100%", height: 180 }} />
+            <Image source={MAP_PREVIEW_IMAGE} contentFit="cover" style={{ width: "100%", height: 283 }} />
             <TouchableOpacity
               className="absolute right-3 top-3 size-9 rounded-full bg-white items-center justify-center"
               activeOpacity={0.8}
